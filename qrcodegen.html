@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Generator</title>
+
+    <!-- Reliable & up-to-date qr-code-styling library -->
+    <script src="https://unpkg.com/qr-code-styling@1.6.0-rc.1/lib/qr-code-styling.js"></script>
+
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            max-width: 480px;
+            width: 100%;
+            text-align: center;
+        }
+        h1 { margin-bottom: 20px; color: #222; }
+        input, select, button {
+            width: 100%;
+            padding: 14px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        button {
+            background: #0066ff;
+            color: white;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        button:hover { background: #0052cc; }
+        #qrCanvas {
+            margin: 25px auto;
+            padding: 15px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .download-btn {
+            background: #28a745;
+        }
+        .download-btn:hover { background: #218838; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>QR Code Generator</h1>
+
+    <input type="text" id="text" placeholder="Enter text, URL, WiFi, etc." value="https://example.com">
+
+    <select id="size">
+        <option value="200">200×200 (Small)</option>
+        <option value="300" selected>300×300 (Medium)</option>
+        <option value="400">400×400 (Large)</option>
+        <option value="600">600×600 (Huge)</option>
+    </select>
+
+    <select id="errorCorrection">
+        <option value="L">Low (7%)</option>
+        <option value="M" selected>Medium (15%)</option>
+        <option value="Q">High (25%)</option>
+        <option value="H">Very High (30%)</option>
+    </select>
+
+    <button onclick="generateQR()">Generate QR Code</button>
+
+    <div id="qrCanvas"></div>
+
+    <button class="download-btn" onclick="downloadQR()" id="downloadBtn" style="display:none;">
+        Download PNG
+    </button>
+</div>
+
+<script type="text/javascript">
+    // Wait for the library to load
+    window.addEventListener('load', () => {
+        if (typeof QRCodeStyling === 'undefined') {
+            document.getElementById("qrCanvas").innerHTML = "<p style='color:red;'>Failed to load QR library. Check internet connection.</p>";
+            return;
+        }
+
+        const qrCode = new QRCodeStyling({
+            width: 300,
+            height: 300,
+            data: "https://example.com",
+            margin: 10,
+            qrOptions: {
+                typeNumber: 0,
+                mode: undefined,           // auto-detect (this is the correct way)
+                errorCorrectionLevel: "M"
+            },
+            dotsOptions: { type: "rounded", color: "#000000" },
+            cornersSquareOptions: { type: "extra-rounded", color: "#000000" },
+            cornersDotOptions: { type: "dot", color: "#000000" },
+            backgroundOptions: { color: "#ffffff" }
+        });
+
+        qrCode.append(document.getElementById("qrCanvas"));
+
+        window.generateQR = function() {
+            const text = document.getElementById("text").value.trim();
+            const size = parseInt(document.getElementById("size").value);
+            const ec = document.getElementById("errorCorrection").value;
+
+            if (!text) {
+                alert("Please enter some text!");
+                return;
+            }
+
+            qrCode.update({
+                width: size,
+                height: size,
+                data: text,
+                qrOptions: { errorCorrectionLevel: ec }
+            });
+
+            document.getElementById("downloadBtn").style.display = "block";
+        };
+
+        window.downloadQR = function() {
+            qrCode.download({ name: "qrcode", extension: "png" });
+        };
+
+        // Generate the first QR on page load
+        generateQR();
+    });
+</script>
+
+</body>
+</html>
