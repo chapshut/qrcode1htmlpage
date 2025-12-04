@@ -1,147 +1,137 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="nl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR Code Generator</title>
-
-    <!-- Reliable & up-to-date qr-code-styling library -->
-    <script src="https://unpkg.com/qr-code-styling@1.6.0-rc.1/lib/qr-code-styling.js"></script>
+    <title>Neon QR Generator</title>
+    <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.6.0-rc.1/lib/qr-code-styling.js"></script>
 
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background: #f4f6f9;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+        body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:#f4f6f9;margin:0;padding:15px;display:flex;flex-direction:column;align-items:center;transition:all .4s;color:#222}
+        body.dark{background:#0d0a1a;color:#e879f9}
+        .container{background:white;padding:20px;border-radius:16px;box-shadow:0 8px 30px rgba(0,0,0,0.15);width:100%;max-width:360px;text-align:center;transition:all .4s}
+        body.dark .container{background:#1a0d2e;border:2px solid #e879f9;box-shadow:0 0 30px rgba(232,121,249,0.3)}
+        h1{margin:0 0 12px;font-size:20px;font-weight:800;background:linear-gradient(90deg,#e879f9,#ff7ac6);-webkit-background-clip:text;color:transparent}
+
+        .dark-mode-row{display:flex;align-items:center;justify-content:space-between;margin:10px 0;padding:0 6px;font-weight:700;font-size:14px;color:#888}
+        body.dark .dark-mode-row label{color:#e879f9}
+        .switch{width:40px;height:22px;position:relative;display:inline-block}
+        .switch input{opacity:0;width:0;height:0}
+        .slider{position:absolute;top:0;left:0;right:0;bottom:0;background:#555;border-radius:34px;border:2px solid #e879f9;transition:.4s}
+        body.dark .slider{background:transparent}
+        .slider:before{position:absolute;content:"";height:16px;width:16px;left:2px;bottom:2px;background:white;border-radius:50%;transition:.4s}
+        input:checked+.slider{background:#e879f9}
+        input:checked+.slider:before{transform:translateX(16px)}
+
+        /* ALLE 3 DE VELDEN NU PERFECT GELIJK */
+        input[type="text"], select{
+            width:100%;
+            padding:11px 12px;
+            margin:8px 0;
+            border:none;
+            border-radius:10px;
+            font-size:15px;
+            box-shadow:0 0 0 2px #e879f9 inset;
+            background:#fff;
+            color:#222;
+            box-sizing:border-box;
+            appearance:none;
+            -webkit-appearance:none;
+            transition:all .3s;
         }
-        .container {
-            background: white;
-            padding: 30px;
-            border-radius: 16px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-            max-width: 480px;
-            width: 100%;
-            text-align: center;
+        input[type="text"]:focus, select:focus{
+            outline:none;
+            box-shadow:0 0 0 3px #e879f9,0 0 15px rgba(232,121,249,0.4);
         }
-        h1 { margin-bottom: 20px; color: #222; }
-        input, select, button {
-            width: 100%;
-            padding: 14px;
-            margin: 10px 0;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            font-size: 16px;
-            box-sizing: border-box;
+        body.dark input[type="text"], body.dark select{
+            background:#0d0a1a;
+            color:#e879f9;
         }
-        button {
-            background: #0066ff;
-            color: white;
-            border: none;
-            font-weight: bold;
-            cursor: pointer;
+        body.dark input[type="text"]:focus, body.dark select:focus{
+            box-shadow:0 0 0 3px #e879f9,0 0 20px rgba(232,121,249,0.6);
         }
-        button:hover { background: #0052cc; }
-        #qrCanvas {
-            margin: 25px auto;
-            padding: 15px;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-        }
-        .download-btn {
-            background: #28a745;
-        }
-        .download-btn:hover { background: #218838; }
+
+        button{width:100%;padding:12px;margin:8px 0;border:none;border-radius:10px;font-size:15px;font-weight:bold;cursor:pointer}
+        #generateBtn{background:linear-gradient(135deg,#e879f9,#c084fc);color:white;box-shadow:0 6px 15px rgba(232,121,249,0.4)}
+        #generateBtn:hover{transform:translateY(-1px)}
+        .download-btn{background:linear-gradient(135deg,#ff9e5c,#ff7ac6);color:white;box-shadow:0 6px 15px rgba(255,158,92,0.4)}
+        .download-btn:hover{transform:translateY(-1px)}
+        #qrCanvas{margin:20px auto;padding:20px;background:#fff;border-radius:16px;box-shadow:0 8px 25px rgba(0,0,0,0.15);transition:all .4s}
+        body.dark #qrCanvas{background:linear-gradient(135deg,#1a0d2e,#2d1b4e);border:2px solid #e879f9;box-shadow:0 0 30px rgba(232,121,249,0.5);padding:22px}
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>QR Code Generator</h1>
+    <h1>Neon QR</h1>
 
-    <input type="text" id="text" placeholder="Enter text, URL, WiFi, etc." value="https://example.com">
+    <div class="dark-mode-row">
+        <label>Dark Mode
+            <span class="switch"><input type="checkbox" id="darkModeToggle"><span class="slider"></span></span>
+        </label>
+    </div>
 
+    <input type="text" id="text" placeholder="Text / URL" value="https://example.com">
     <select id="size">
-        <option value="200">200×200 (Small)</option>
-        <option value="300" selected>300×300 (Medium)</option>
-        <option value="400">400×400 (Large)</option>
-        <option value="600">600×600 (Huge)</option>
+        <option value="200">200×200</option>
+        <option value="280" selected>280×280</option>
+        <option value="360">360×360</option>
     </select>
-
     <select id="errorCorrection">
-        <option value="L">Low (7%)</option>
-        <option value="M" selected>Medium (15%)</option>
-        <option value="Q">High (25%)</option>
-        <option value="H">Very High (30%)</option>
+        <option value="M" selected>Medium</option>
+        <option value="Q">High</option>
+        <option value="H">Very High</option>
     </select>
 
-    <button onclick="generateQR()">Generate QR Code</button>
-
+    <button id="generateBtn">Generate</button>
     <div id="qrCanvas"></div>
-
-    <button class="download-btn" onclick="downloadQR()" id="downloadBtn" style="display:none;">
-        Download PNG
-    </button>
+    <button id="downloadBtn" class="download-btn">Download PNG</button>
 </div>
 
-<script type="text/javascript">
-    // Wait for the library to load
-    window.addEventListener('load', () => {
-        if (typeof QRCodeStyling === 'undefined') {
-            document.getElementById("qrCanvas").innerHTML = "<p style='color:red;'>Failed to load QR library. Check internet connection.</p>";
-            return;
-        }
-
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
         const qrCode = new QRCodeStyling({
-            width: 300,
-            height: 300,
-            data: "https://example.com",
-            margin: 10,
-            qrOptions: {
-                typeNumber: 0,
-                mode: undefined,           // auto-detect (this is the correct way)
-                errorCorrectionLevel: "M"
-            },
-            dotsOptions: { type: "rounded", color: "#000000" },
-            cornersSquareOptions: { type: "extra-rounded", color: "#000000" },
-            cornersDotOptions: { type: "dot", color: "#000000" },
-            backgroundOptions: { color: "#ffffff" }
+            width:280,height:280,data:"https://example.com",margin:10,
+            qrOptions:{errorCorrectionLevel:"H"},
+            dotsOptions:{type:"rounded"},
+            cornersSquareOptions:{type:"extra-rounded"},
+            cornersDotOptions:{type:"dot"},
+            backgroundOptions:{color:"#0d0a1a"}
         });
-
         qrCode.append(document.getElementById("qrCanvas"));
 
-        window.generateQR = function() {
-            const text = document.getElementById("text").value.trim();
-            const size = parseInt(document.getElementById("size").value);
-            const ec = document.getElementById("errorCorrection").value;
+        const toggle = document.getElementById("darkModeToggle");
+        if (localStorage.getItem("darkMode")==="enabled") {
+            document.body.classList.add("dark");
+            toggle.checked = true;
+        }
 
-            if (!text) {
-                alert("Please enter some text!");
-                return;
-            }
+        const gen = () => {
+            const txt = document.getElementById("text").value.trim() || "https://example.com";
+            const sz = parseInt(document.getElementById("size").value);
+            const dark = document.body.classList.contains("dark");
 
             qrCode.update({
-                width: size,
-                height: size,
-                data: text,
-                qrOptions: { errorCorrectionLevel: ec }
+                width:sz,height:sz,data:txt,
+                dotsOptions:{color:dark?"#e879f9":"#000000"},
+                cornersSquareOptions:{color:dark?"#e879f9":"#000000"},
+                cornersDotOptions:{color:dark?"#ff7ac6":"#000000"},
+                backgroundOptions:{color:dark?"#0d0a1a":"#ffffff"},
+                dotsOptionsHelper: dark ? {colorType:{gradient:{type:"radial",colorStops:[
+                    {offset:0,color:"#e879f9"},{offset:0.5,color:"#f778ba"},{offset:1,color:"#ff9e5c"}
+                ]}}} : undefined
             });
-
-            document.getElementById("downloadBtn").style.display = "block";
         };
 
-        window.downloadQR = function() {
-            qrCode.download({ name: "qrcode", extension: "png" });
-        };
-
-        // Generate the first QR on page load
-        generateQR();
+        toggle.addEventListener("change", () => {
+            document.body.classList.toggle("dark");
+            localStorage.setItem("darkMode", toggle.checked ? "enabled" : "disabled");
+            gen();
+        });
+        document.getElementById("generateBtn").onclick = gen;
+        document.getElementById("downloadBtn").onclick = () => qrCode.download({name:"neon-qr",extension:"png"});
+        gen();
     });
 </script>
-
 </body>
 </html>
